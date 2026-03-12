@@ -46,7 +46,7 @@ const { AccessSignature, refreshSignature } = getSignature(user.Roll);
       expiresIn: 60 * 15,
       notBefore: 1,
 
-      audience: [user.Roll, tokenEnum.access],
+      audience: [user.Roll, tokenEnum.access],//we  put tokenEnum.access to return it.s type
       subject: user._id.toString(),
     },
   });

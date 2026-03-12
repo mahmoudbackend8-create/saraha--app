@@ -3,9 +3,9 @@ import { forbiddenExeption } from "../Commeon/Response/Response.js";
 
 export function authorization(roles = [User_Roll.User]) {
   return (req, res, next) => {
-    console.log(req.user);
+    // console.log(req.user);
     
-    console.log(req.user.Roll);
+    // console.log(req.user.Roll);
     // console.log(roles);
     
   

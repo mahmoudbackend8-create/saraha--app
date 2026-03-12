@@ -16,10 +16,12 @@ export async function findOne({
   }
   return result;
 }
+
 export async function Create({ model, data, Options = {} }) {
   const result = await model.create([data], Options);
   return result;
 }
+
 export async function findById({
   model,
   id,
@@ -29,12 +31,14 @@ export async function findById({
 }) {
   let result = "";
   if (populate) {
-    result = await model
-      .findById(id)
-      .select(selelct)
-      .populate(populateField);
+    result = await model.findById(id).select(selelct).populate(populateField);
   } else {
     result = await model.findById(id).select(selelct);
   }
+  return result;
+}
+
+export async function updateOne({ model, filter, data, option }) {
+  const result = await model.updateOne( filter, data, option );
   return result;
 }

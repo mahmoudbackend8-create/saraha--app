@@ -1,6 +1,11 @@
 import joi from "joi";
 import { badRequestExeption } from "../Commeon/Response/Response.js";
-import { User_Gender, User_Providor, User_Roll } from "../Commeon/Enums/User.Enums.js";
+import {
+  User_Gender,
+  User_Providor,
+  User_Roll,
+} from "../Commeon/Enums/User.Enums.js";
+import { Types } from "mongoose";
 
 export function validation(schema) {
   return (req, res, next) => {
@@ -9,7 +14,7 @@ export function validation(schema) {
       const validationResult = schema[schemaKey].validate(req[schemaKey], {
         abortEarly: false,
       });
-      req[schemaKey] = validationResult.value;
+      // req[schemaKey] = validationResult.value;
 
       if (validationResult.error?.details.length > 0) {
         validationErr.push(validationResult.error);
@@ -35,3 +40,10 @@ export const CommonFieldValidation = {
   confirmEmail: joi.boolean(),
   Providor: joi.string().valid(...Object.values(User_Providor)),
 };
+
+export  function validateObjectId(value, helpers) {
+  if (!Types.ObjectId.isValid(value)) {
+    return helpers.message("invalid ObjectId");
+  }
+
+}

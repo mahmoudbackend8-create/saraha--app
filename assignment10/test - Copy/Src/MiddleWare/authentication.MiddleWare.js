@@ -15,6 +15,7 @@ export function authentication(tokenTypeParam = tokenEnum.access) {
   return async (req, res, next) => {
     const { authorization } = req.headers;
 
+
     const [BearerKey, token] = authorization.split(" ");
     if (BearerKey != "Bearer") {
       return badRequestExeption("Invalid BearerKey");
@@ -22,6 +23,7 @@ export function authentication(tokenTypeParam = tokenEnum.access) {
 
     const deCoded = decodeToken({ token: token });
     // const deCoded = jwt.decode(authorization); //extreact from token
+console.log(deCoded);
 
     const [userRole, TokenType] = deCoded.aud;
 

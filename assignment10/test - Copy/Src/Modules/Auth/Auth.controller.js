@@ -10,8 +10,14 @@ import { successResponse } from "../../Commeon/Response/Response.js";
 
 import { validation } from "../../MiddleWare/validation.MiddleWare.js";
 import { SignUpSchema } from "./Auth.validation.js";
+import {
+  allowFileFormats,
+  localUpload,
+} from "../../Commeon/Multer/Multer.Config.js";
 
 const AuthRouter = express.Router();
+
+
 AuthRouter.post("/SignUp", validation(SignUpSchema), async (req, res) => {
   const result = await signUp(req.body);
   return successResponse({ res, statusCode: 201, data: result });

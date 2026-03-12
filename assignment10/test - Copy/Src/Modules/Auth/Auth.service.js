@@ -42,11 +42,12 @@ export async function signUp(bodyData) {
   });
   bodyData.Password = hashPassword;
 
-  const phoneCrypted = CryptoJS.AES.encrypt(
+  if( bodyData.phone){  const phoneCrypted = CryptoJS.AES.encrypt(
     bodyData.phone,
     ENCRYPTION_KEY,
   ).toString();
-  bodyData.phone = phoneCrypted;
+  bodyData.phone = phoneCrypted;}
+
 
   const User = await dbRepo.Create({ model: UserModel, data: bodyData });
   return User;

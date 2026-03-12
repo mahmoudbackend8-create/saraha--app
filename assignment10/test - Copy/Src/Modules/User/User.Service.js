@@ -19,6 +19,7 @@ import {
   getSignature,
   verifyToken,
 } from "../../Commeon/Security/token.js";
+import { decreyption } from "../../Commeon/Security/encrypt.js";
 
 //decoded
 //get user data
@@ -55,4 +56,46 @@ export async function renewToken(UserData) {
   });
 
   return newAccessToken;
+}
+
+export async function uploadProfilePic(userId, file) {
+  const result = await dbRepo.updateOne({
+    model: UserModel,
+    filter: { _id: userId },
+    data: { ProfilePic: file.finalPath }, //ProfilePic same name in USERMODEL
+  });
+}
+
+export async function coverProfilePic(userId, files) {
+  const filePicsPath = files.map((file) => {
+    return file.finalPath;
+  });
+
+  //or
+
+  // const filePicsPath=[]
+  // for(const file of files){
+  //   filePicsPath.push(file.finalPath)
+  // }
+
+  const result = await dbRepo.updateOne({
+    model: UserModel,
+    filter: { _id: userId },
+    data: { coverFilePic: filePicsPath }, //ProfilePic same name in USERMODEL
+  });
+}
+
+export async function getAnotherProfile(profileId) {
+  const user = await dbRepo.findById({
+    model: UserModel,
+    id: profileId,
+    selelct:
+      "-Password -Roll -confirmEmail -Providor -createdAt -updatedAt -__v",
+  });
+
+  if (user.phone) {
+    user.phone = decreyption({ ciphertext: user.phone });
+  }
+
+  return user;
 }
