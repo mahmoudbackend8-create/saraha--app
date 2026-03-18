@@ -5,7 +5,6 @@ import {
   User_Roll,
 } from "../../Commeon/Enums/User.Enums.js";
 
-
 const UserSchema = new mongoose.Schema(
   {
     UserName: {
@@ -43,12 +42,17 @@ const UserSchema = new mongoose.Schema(
       default: User_Providor.System,
     },
     ProfilePic: String,
-    coverFilePic:[String],
+    coverFilePic: [String],
     OTP: {
       type: String,
     },
     OTPExpires: {
       type: Date,
+    },
+    ChangeCreditTime: Date,
+    visitCount: {
+      type: Number,
+      default: 0,
     },
   },
 

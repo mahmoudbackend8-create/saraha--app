@@ -7,7 +7,7 @@ import {
 import { tokenEnum } from "../Enums/token.Enums.js";
 import { User_Roll } from "../Enums/User.Enums.js";
 import jwt from "jsonwebtoken";
-
+import { randomUUID } from "node:crypto";
 export function getSignature(role) {
   let refreshSignature = "";
   let AccessSignature = "";
@@ -34,19 +34,17 @@ export function decodeToken({ token }) {
   return jwt.decode(token);
 }
 
-export function generateAccessAndRefreshToken(user){
-
-
-const { AccessSignature, refreshSignature } = getSignature(user.Roll);
-
+export function generateAccessAndRefreshToken(user) {
+  const { AccessSignature, refreshSignature } = getSignature(user.Roll);
+  const TokenId = randomUUID();
   const Access_Token = generateToken({
     signature: AccessSignature,
     options: {
-      noTimestamp: true,
+      noTimestamp: false,
       expiresIn: 60 * 15,
       notBefore: 1,
-
-      audience: [user.Roll, tokenEnum.access],//we  put tokenEnum.access to return it.s type
+      jwtid: TokenId,
+      audience: [user.Roll, tokenEnum.access], //we  put tokenEnum.access to return it.s type
       subject: user._id.toString(),
     },
   });
@@ -54,15 +52,15 @@ const { AccessSignature, refreshSignature } = getSignature(user.Roll);
   const Refresh_Token = generateToken({
     signature: refreshSignature,
     options: {
-      noTimestamp: true,
+  
+      noTimestamp: false,
       expiresIn: "1y",
       notBefore: 1,
-
+      jwtid: TokenId,
       audience: [user.Roll, tokenEnum.refresh],
       subject: user._id.toString(),
     },
   });
 
-  return { Access_Token, Refresh_Token};
-
+  return { Access_Token, Refresh_Token };
 }

@@ -4,7 +4,7 @@ import {
   conflictExeption,
   notFoundExeption,
 } from "../../Commeon/Response/Response.js";
-import UserModel from "../../DB/DB.Modules/Users.modul.js";
+import UserModel from "../../DB/DB.models/Users.model.js";
 import * as dbRepo from "../../DB/DB.Repository.js";
 import {
   ADMIN_TOKEN_SIGNITURE,

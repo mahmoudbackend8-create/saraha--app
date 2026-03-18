@@ -1,4 +1,4 @@
-import UserModel from "../../DB/DB.Modules/Users.modul.js";
+import UserModel from "../../DB/DB.models/Users.model.js";
 import jwt from "jsonwebtoken";
 import * as dbRepo from "../../DB/DB.Repository.js";
 import {
@@ -20,6 +20,8 @@ import {
   verifyToken,
 } from "../../Commeon/Security/token.js";
 import { decreyption } from "../../Commeon/Security/encrypt.js";
+// import { TokenModel } from "../../DB/DB.models/Token.model.js";
+import * as RedisService from "../../DB/DB.models/redis.service.js";
 
 //decoded
 //get user data
@@ -67,9 +69,33 @@ export async function uploadProfilePic(userId, file) {
 }
 
 export async function coverProfilePic(userId, files) {
-  const filePicsPath = files.map((file) => {
-    return file.finalPath;
+  const user = await dbRepo.findOne({
+    model: UserModel,
+    filter: { _id: userId },
+    select: "coverFilePic",
   });
+
+  const oldPics = user.coverFilePic || [];
+  const newPics = files.map((file) => file.finalPath);
+  const total = oldPics.length + newPics.length;
+
+  if (total !== 2) {
+    throw badRequestExeption({
+      msg: "Total must be  2",
+    });
+  }
+  const finalPics = [...oldPics, ...newPics];
+
+  const result = await dbRepo.updateOne({
+    model: UserModel,
+    filter: { _id: userId },
+    data: { coverFilePic: finalPics },
+  });
+
+  return result;
+  // const filePicsPath = files.map((file) => {
+  //   return file.finalPath;
+  // });
 
   //or
 
@@ -78,11 +104,11 @@ export async function coverProfilePic(userId, files) {
   //   filePicsPath.push(file.finalPath)
   // }
 
-  const result = await dbRepo.updateOne({
-    model: UserModel,
-    filter: { _id: userId },
-    data: { coverFilePic: filePicsPath }, //ProfilePic same name in USERMODEL
-  });
+  // const result = await dbRepo.updateOne({
+  //   model: UserModel,
+  //   filter: { _id: userId },
+  //   data: { coverFilePic: filePicsPath }, //ProfilePic same name in USERMODEL
+  // });
 }
 
 export async function getAnotherProfile(profileId) {
@@ -98,4 +124,76 @@ export async function getAnotherProfile(profileId) {
   }
 
   return user;
+}
+
+export async function logOut(userId, TokenData, LogOutOption) {
+  if (LogOutOption == "all") {
+    await dbRepo.updateOne({
+      model: UserModel,
+      filter: { _id: userId },
+      data: { ChangeCreditTime: new Date() },
+    });
+  } else {
+    await RedisService.set({
+      key: RedisService.BlackListKeys({
+        userID: TokenData.sub,
+        TokenID: TokenData.jti,
+      }),
+      value: TokenData.jti,
+      EXvalue: 60 * 60 * 24 * 365 - (Date.now() / 1000 - TokenData.iat), //(exRefreshToken -ramain time from initiated)
+    });
+  }
+}
+
+/*
+old way
+export async function logOut(userId, TokenData, LogOutOption) {
+  if (LogOutOption == "all") {
+    await dbRepo.updateOne({
+      model: UserModel,
+      filter: { _id: userId },
+      data: { ChangeCreditTime: new Date() },
+    });
+  } else {
+    const Token = await dbRepo.Create({
+      model: TokenModel,
+      data: {
+        jwti: TokenData.jti,
+        userId,
+        expiredIn: (TokenData.iat + 60 * 60 * 24 * 365) * 1000, // data base dealing with meleSceond - token with Seconds
+      },
+    });
+    return Token;
+  }
+}
+
+*/
+
+import fs from "fs";
+import path from "path";
+
+export async function removeProfilePic(userId) {
+  const user = await dbRepo.findOne({
+    model: UserModel,
+    filter: { _id: userId },
+    select: "profilePic",
+  });
+
+  if (!user || !user.profilePic) {
+    throw badRequestExeption({ msg: "No profile picture found" });
+  }
+
+  const filePath = path.resolve(user.profilePic);
+
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+
+  const result = await dbRepo.updateOne({
+    model: UserModel,
+    filter: { _id: userId },
+    data: { profilePic: null },
+  });
+
+  return result;
 }

@@ -18,3 +18,4 @@ export const REFRESH_USER_TOKEN_SIGNITURE =
   process.env.REFRESH_USER_TOKEN_SIGNITURE;
 export const REFRESH_ADMIN_TOKEN_SIGNITURE =
   process.env.REFRESH_ADMIN_TOKEN_SIGNITURE;
+  export const REDIS_URL = process.env.REDIS_URL
